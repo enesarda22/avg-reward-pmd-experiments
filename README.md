@@ -35,22 +35,6 @@ figures.
 | App. Fig. F.3   | `run_inexact_pmd.py` |
 | App. Fig. F.4   | `run_rate_gap_*_capped.py` (4 scripts) → `plot_rate_gap_appendix_panels.py` |
 
-## Step-size schedules
-
-Two schedules are used across the experiments:
-
-- **Mixed super-geometric** $\eta_t = \eta_0\, c^{\,t}\, \alpha^{\,t^2}$ with
-  ratio $c\,\alpha^{2t-1}$. Bounded below by $c$ for all $t \ge 0$ (so the
-  non-asymptotic floor of Lemma 3.7(i) holds with $\bar\chi/(\bar\chi-1) \le c$)
-  and divergent as $t \to \infty$ (so the asymptotic hypothesis of
-  Lemma 3.7(ii) holds). Used by the 3-state exact-PMD experiments.
-- **Capped super-geometric** $\eta_t = \min(\eta_0\, c^{\,t}\, \alpha^{\,t^2},
-  \eta_{\mathrm{cap}})$. Same structure, capped to prevent floating-point
-  overflow once $\eta_t$ exceeds the inverse $Q$-range. Used by the rate-gap
-  experiments with $(\eta_0, c, \alpha, \eta_{\mathrm{cap}}) = (10, 1.1, 1.001, 100)$.
-
-Both are implemented in `avg_reward_pmd/schedules.py`.
-
 ## Package layout
 
 ```
