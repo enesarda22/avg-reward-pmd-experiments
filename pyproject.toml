@@ -1,0 +1,25 @@
+[project]
+name = "avg-reward-pmd"
+version = "0.1.0"
+description = "Numerical experiments for the paper 'Sharp Convergence and Sample Complexity of Policy Mirror Descent for Average-Reward MDPs'"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "matplotlib>=3.9",
+    "gymnasium>=1.3.0",
+    "gym-classics>=1.0.0",
+    "gym>=0.26.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["avg_reward_pmd"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
