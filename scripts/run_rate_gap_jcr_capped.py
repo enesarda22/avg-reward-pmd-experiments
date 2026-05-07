@@ -20,7 +20,7 @@ import numpy as np
 
 from avg_reward_pmd.jacks_car_rental import jacks_car_rental_mdp
 from avg_reward_pmd.metrics import tail_chi
-from avg_reward_pmd.pmd import run_pmd
+from avg_reward_pmd.pmd import run_pmd, stationary_distribution, weighted_kl
 from avg_reward_pmd.random_mdp import solve_optimal_policy
 from avg_reward_pmd.schedules import super_geometric_with_floor
 
@@ -37,6 +37,7 @@ ETA0: float = 10.0
 C: float = 1.1
 ALPHA: float = 1.001
 ETA_CAP: float = 100.0
+ETA_MINUS_1: float = ETA0 / C
 
 
 def _capped_schedule(horizon: int) -> np.ndarray:
@@ -56,13 +57,19 @@ def _run_one(mdp, pi_star, rho_star, pi_init, horizon, seed):
                     pi_star=pi_star, rho_star=rho_star)
     chi_bar = float(np.max(result.chi))
     chi_hat = tail_chi(result.chi, tail_fraction=0.2)
+    delta_0 = float(result.delta[0])
+    d_star = stationary_distribution(np.einsum('sa,san->sn', pi_star, mdp.P))
+    d_0_star = float(weighted_kl(pi_star, pi_init, d_star))
+    psi_0 = delta_0 + d_0_star / (ETA_MINUS_1 * chi_bar)
     return {
         "tag": "random", "seed": seed, "horizon": horizon,
         "eta0": ETA0, "c": C, "alpha": ALPHA, "eta_cap": ETA_CAP,
         "chi_bar": chi_bar, "chi_tail": chi_hat,
         "ratio_bar_over_tail": chi_bar / max(chi_hat, 1e-300),
-        "delta_0": float(result.delta[0]),
+        "delta_0": delta_0,
         "delta_final": float(result.delta[-1]),
+        "d_0_star": d_0_star,
+        "psi_0": float(psi_0),
         "chi_traj": result.chi.tolist(),
         "delta_traj": result.delta.tolist(),
     }

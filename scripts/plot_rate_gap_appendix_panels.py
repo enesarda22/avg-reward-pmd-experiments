@@ -63,10 +63,11 @@ def _load(path: Path) -> dict:
         return json.load(f)
 
 
-def _ensemble_arrays(records: list[dict]) -> tuple[np.ndarray, np.ndarray]:
+def _ensemble_arrays(records: list[dict]) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     deltas = np.stack([np.asarray(r["delta_traj"]) for r in records])
     chis = np.stack([np.asarray(r["chi_traj"]) for r in records])
-    return deltas, chis
+    psi0s = np.array([r["psi_0"] for r in records])
+    return deltas, chis, psi0s
 
 
 def _band(ax, t, traj, color, label):
@@ -105,7 +106,7 @@ def _panel_label(ax, label: str) -> None:
 
 
 def _plot_one_row(
-    ax_delta, ax_chi, deltas: np.ndarray, chis: np.ndarray, ensemble_name: str
+    ax_delta, ax_chi, deltas: np.ndarray, chis: np.ndarray, psi0s: np.ndarray, ensemble_name: str
 ) -> None:
     t = np.arange(deltas.shape[1])
 
@@ -115,7 +116,7 @@ def _plot_one_row(
     chi_tails = np.median(chis[:, -n_tail:], axis=1)
     chi_bar_med = float(np.median(chi_bars))
     chi_tail_med = float(np.median(chi_tails))
-    delta0_med = float(np.median(deltas[:, 0]))
+    psi0_med = float(np.median(psi0s))
 
     # --- Panel (a): Delta_t ---
     deltas_clipped = np.clip(deltas, 1e-15, None)
@@ -123,18 +124,18 @@ def _plot_one_row(
     delta_ceiling = float(deltas_clipped.max()) * 5
     _band(ax_delta, t, deltas_clipped, _C_DATA, r"median $\Delta_t$")
     if chi_bar_med > 1.0:
-        ref_bar = np.clip(delta0_med * (1 - 1 / chi_bar_med) ** t, delta_floor, None)
+        ref_bar = np.clip(psi0_med * (1 - 1 / chi_bar_med) ** t, delta_floor, None)
         ax_delta.semilogy(
             t, ref_bar, color=_C_REF1, linestyle="--",
-            label=rf"$(1-1/\bar\chi)^t\,\Delta_0,\;\bar\chi\approx{chi_bar_med:.1f}$",
+            label=rf"$(1-1/\bar\chi)^t\,\Psi_0,\;\bar\chi\approx{chi_bar_med:.1f}$",
         )
     if chi_tail_med > 1.05:  # skip when essentially superlinear
         ref_tail = np.clip(
-            delta0_med * (1 - 1 / chi_tail_med) ** t, delta_floor, None
+            psi0_med * (1 - 1 / chi_tail_med) ** t, delta_floor, None
         )
         ax_delta.semilogy(
             t, ref_tail, color=_C_REF2, linestyle=":",
-            label=rf"$(1-1/\chi)^t\,\Delta_0,\;\chi\approx{chi_tail_med:.2f}$",
+            label=rf"$(1-1/\chi)^t\,\Psi_0,\;\chi\approx{chi_tail_med:.2f}$",
         )
     ax_delta.set_xlabel(r"Iteration $t$")
     ax_delta.set_ylabel(r"$\Delta_t = \rho(\pi^t) - \rho^\star$")
@@ -195,8 +196,8 @@ def main() -> None:
 
     fig, axes = plt.subplots(4, 2, figsize=_FIGSIZE)
     for (recs, name), (ax_delta, ax_chi) in zip(rows, axes):
-        deltas, chis = _ensemble_arrays(recs)
-        _plot_one_row(ax_delta, ax_chi, deltas, chis, name)
+        deltas, chis, psi0s = _ensemble_arrays(recs)
+        _plot_one_row(ax_delta, ax_chi, deltas, chis, psi0s, name)
 
     fig.tight_layout(h_pad=0.6, w_pad=1.0)
     args.output.parent.mkdir(parents=True, exist_ok=True)
