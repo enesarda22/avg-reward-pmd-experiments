@@ -1,10 +1,10 @@
-"""Slip-prone GridWorld rate-gap experiment with the capped super-geometric
-schedule. Sibling of ``run_rate_gap_queuing_capped.py``.
+"""Slip-prone GridWorld rate-gap experiment (paper, Appendix F.4), with the
+same mixed super-geometric schedule as ``run_rate_gap.py``.
 
-Output: ``figures/rate_gap_gridworld_data_capped.json``.
+Output: ``figures/rate_gap_gridworld_data.json``.
 
 Run:
-    uv run python scripts/run_rate_gap_gridworld_capped.py
+    uv run python scripts/run_rate_gap_gridworld.py
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from avg_reward_pmd.schedules import super_geometric_with_floor
 
 DEFAULT_OUTPUT = (
     Path(__file__).resolve().parent.parent
-    / "figures" / "rate_gap_gridworld_data_capped.json"
+    / "figures" / "rate_gap_gridworld_data.json"
 )
 
 DEFAULT_N_INITS: int = 80
@@ -34,15 +34,11 @@ DIRICHLET_ALPHA: float = 0.5
 ETA0: float = 10.0
 C: float = 1.1
 ALPHA: float = 1.001
-ETA_CAP: float = 100.0
 ETA_MINUS_1: float = ETA0 / C
 
 
-def _capped_schedule(horizon: int) -> np.ndarray:
-    return np.minimum(
-        super_geometric_with_floor(eta0=ETA0, c=C, alpha=ALPHA, horizon=horizon),
-        ETA_CAP,
-    )
+def _schedule(horizon: int) -> np.ndarray:
+    return super_geometric_with_floor(eta0=ETA0, c=C, alpha=ALPHA, horizon=horizon)
 
 
 def random_initial_policy(rng, n_states, n_actions):
@@ -50,7 +46,7 @@ def random_initial_policy(rng, n_states, n_actions):
 
 
 def _run_one(mdp, pi_star, rho_star, pi_init, horizon, seed):
-    schedule = _capped_schedule(horizon)
+    schedule = _schedule(horizon)
     result = run_pmd(mdp=mdp, pi0=pi_init, eta_schedule=schedule,
                     pi_star=pi_star, rho_star=rho_star)
     chi_bar = float(np.max(result.chi))
@@ -61,7 +57,7 @@ def _run_one(mdp, pi_star, rho_star, pi_init, horizon, seed):
     psi_0 = delta_0 + d_0_star / (ETA_MINUS_1 * chi_bar)
     return {
         "tag": "random", "seed": seed, "horizon": horizon,
-        "eta0": ETA0, "c": C, "alpha": ALPHA, "eta_cap": ETA_CAP,
+        "eta0": ETA0, "c": C, "alpha": ALPHA,
         "chi_bar": chi_bar, "chi_tail": chi_hat,
         "ratio_bar_over_tail": chi_bar / max(chi_hat, 1e-300),
         "delta_0": delta_0,
@@ -103,8 +99,8 @@ def main() -> None:
             "env": "gridworld_5x5 (slip=0.1, start=(4,0), goal=(0,4))",
             "n_inits": args.n_inits,
             "horizon": args.horizon,
-            "eta0": ETA0, "c": C, "alpha": ALPHA, "eta_cap": ETA_CAP,
-            "schedule": "super_geometric_with_floor capped at eta_cap",
+            "eta0": ETA0, "c": C, "alpha": ALPHA,
+            "schedule": "super_geometric_with_floor",
             "dirichlet_alpha_init": DIRICHLET_ALPHA,
         },
         "records": records,

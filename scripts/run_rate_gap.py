@@ -1,17 +1,16 @@
-"""Random-MDP rate-gap experiment with a *capped super-geometric* schedule.
+"""Random-MDP rate-gap experiment (paper, Appendix F.4).
 
-Sibling of ``run_rate_gap.py``. Same MDP ensembles and adversarial init, but
-the step size follows ``eta_t = min(eta_0 * c^t * alpha^{t^2}, eta_cap)``. The
-super-geometric portion (until the cap binds) satisfies the floor hypothesis
-of Lemma 3.7(i) (with ``c >= chi_bar / (chi_bar - 1)`` for ``chi_bar`` not too
-small) and the divergent-ratio hypothesis of Lemma 3.7(ii); the cap keeps the
-schedule numerically sensible for the plotted horizon.
+Random Dirichlet MDPs run from the adversarial worst-cost initial policy with
+the mixed super-geometric schedule ``eta_t = eta_0 * c^t * alpha^{t^2}`` (the
+paper's ``b`` is ``c`` here). Its ratio is at least ``c``, so Lemma 3.7(i)
+holds with ``chi_bar`` replaced by ``max{c / (c - 1), chi_bar}``, and it
+diverges, as Lemma 3.7(ii) requires. The KL-PMD update runs in log space, so
+the large late steps cause no overflow.
 
-Output: ``figures/rate_gap_data_capped.json`` (does not overwrite the
-constant-eta baseline at ``figures/rate_gap_data.json``).
+Output: ``figures/rate_gap_data.json``.
 
 Run:
-    uv run python scripts/run_rate_gap_capped.py
+    uv run python scripts/run_rate_gap.py
 """
 
 from __future__ import annotations
@@ -33,7 +32,7 @@ from avg_reward_pmd.random_mdp import (
 from avg_reward_pmd.schedules import super_geometric_with_floor
 
 DEFAULT_OUTPUT = (
-    Path(__file__).resolve().parent.parent / "figures" / "rate_gap_data_capped.json"
+    Path(__file__).resolve().parent.parent / "figures" / "rate_gap_data.json"
 )
 
 DEFAULT_CONFIGS: list[tuple[int, int]] = [
@@ -46,19 +45,15 @@ DEFAULT_N_MDPS: int = 80
 DEFAULT_HORIZON: int = 60
 DEFAULT_DIRICHLET_ALPHA: float = 0.1
 
-# Capped super-geometric schedule.
+# Mixed super-geometric schedule (paper, Appendix F).
 ETA0: float = 10.0
 C: float = 1.1
 ALPHA: float = 1.001
-ETA_CAP: float = 100.0
 ETA_MINUS_1: float = ETA0 / C
 
 
-def _capped_schedule(horizon: int) -> np.ndarray:
-    return np.minimum(
-        super_geometric_with_floor(eta0=ETA0, c=C, alpha=ALPHA, horizon=horizon),
-        ETA_CAP,
-    )
+def _schedule(horizon: int) -> np.ndarray:
+    return super_geometric_with_floor(eta0=ETA0, c=C, alpha=ALPHA, horizon=horizon)
 
 
 def _run_one(n_states, n_actions, seed, horizon, dirichlet_alpha):
@@ -67,7 +62,7 @@ def _run_one(n_states, n_actions, seed, horizon, dirichlet_alpha):
                             dirichlet_alpha=dirichlet_alpha)
     pi_star, rho_star = solve_optimal_policy(mdp)
     pi_init = worst_cost_deterministic_policy(mdp)
-    schedule = _capped_schedule(horizon)
+    schedule = _schedule(horizon)
     result = run_pmd(mdp=mdp, pi0=pi_init, eta_schedule=schedule,
                     pi_star=pi_star, rho_star=rho_star)
     chi_bar = float(np.max(result.chi))
@@ -81,7 +76,7 @@ def _run_one(n_states, n_actions, seed, horizon, dirichlet_alpha):
         "n_states": n_states,
         "n_actions": n_actions,
         "horizon": horizon,
-        "eta0": ETA0, "c": C, "alpha": ALPHA, "eta_cap": ETA_CAP,
+        "eta0": ETA0, "c": C, "alpha": ALPHA,
         "chi_bar": chi_bar,
         "chi_tail": chi_hat,
         "ratio_bar_over_tail": chi_bar / max(chi_hat, 1e-300),
@@ -122,8 +117,8 @@ def main() -> None:
             "configs": DEFAULT_CONFIGS,
             "n_mdps_per_config": args.n_mdps,
             "horizon": args.horizon,
-            "eta0": ETA0, "c": C, "alpha": ALPHA, "eta_cap": ETA_CAP,
-            "schedule": "super_geometric_with_floor capped at eta_cap",
+            "eta0": ETA0, "c": C, "alpha": ALPHA,
+            "schedule": "super_geometric_with_floor",
             "dirichlet_alpha": args.dirichlet_alpha,
             "init_policy": "worst-cost deterministic",
         },

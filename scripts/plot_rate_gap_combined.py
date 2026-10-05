@@ -1,11 +1,10 @@
-"""Combined rate-gap plot for the *capped super-geometric* variant.
+"""Combined rate-gap plot (paper, Figure 1).
 
-Sibling of ``plot_rate_gap_combined.py``. Reads the
-``rate_gap_data_capped.json`` and ``rate_gap_queuing_data_capped.json``
-outputs and produces ``rate_gap_combined_capped.pdf``.
+Reads the four ``rate_gap_*data.json`` outputs of the ``run_rate_gap*.py``
+scripts and produces ``rate_gap_combined.pdf``.
 
 Run:
-    uv run python scripts/plot_rate_gap_combined_capped.py
+    uv run python scripts/plot_rate_gap_combined.py
 """
 
 from __future__ import annotations
@@ -18,10 +17,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 FIG_DIR = Path(__file__).resolve().parent.parent / "figures"
-RANDOM_INPUT = FIG_DIR / "rate_gap_data_capped.json"
-QUEUING_INPUT = FIG_DIR / "rate_gap_queuing_data_capped.json"
-GRIDWORLD_INPUT = FIG_DIR / "rate_gap_gridworld_data_capped.json"
-JCR_INPUT = FIG_DIR / "rate_gap_jcr_data_capped.json"
+RANDOM_INPUT = FIG_DIR / "rate_gap_data.json"
+QUEUING_INPUT = FIG_DIR / "rate_gap_queuing_data.json"
+GRIDWORLD_INPUT = FIG_DIR / "rate_gap_gridworld_data.json"
+JCR_INPUT = FIG_DIR / "rate_gap_jcr_data.json"
 
 # Okabe-Ito: blue, vermilion, green, reddish purple.
 _C_PALETTE = ["#0072B2", "#D55E00", "#009E73", "#CC79A7"]
@@ -84,7 +83,7 @@ def main() -> None:
     parser.add_argument("--jcr-input", type=Path, default=JCR_INPUT)
     parser.add_argument(
         "--output", type=Path,
-        default=FIG_DIR / "rate_gap_combined_capped.pdf",
+        default=FIG_DIR / "rate_gap_combined.pdf",
     )
     args = parser.parse_args()
 

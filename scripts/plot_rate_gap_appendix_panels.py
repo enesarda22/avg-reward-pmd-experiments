@@ -1,6 +1,6 @@
 """Per-ensemble (a)(b) panels for the rate-gap appendix figure.
 
-Reads the four ``rate_gap_*_data_capped.json`` outputs and produces a single
+Reads the four ``rate_gap_*data.json`` outputs and produces a single
 4-row x 2-column figure (one row per MDP family) in the same visual style as
 ``avg_reward_pmd.plotting.rate_and_chi_figure``: panel (a) shows median
 ``Delta_t`` with non-asymptotic and asymptotic-rate references; panel (b)
@@ -21,10 +21,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 FIG_DIR = Path(__file__).resolve().parent.parent / "figures"
-RANDOM_INPUT = FIG_DIR / "rate_gap_data_capped.json"
-QUEUING_INPUT = FIG_DIR / "rate_gap_queuing_data_capped.json"
-GRIDWORLD_INPUT = FIG_DIR / "rate_gap_gridworld_data_capped.json"
-JCR_INPUT = FIG_DIR / "rate_gap_jcr_data_capped.json"
+RANDOM_INPUT = FIG_DIR / "rate_gap_data.json"
+QUEUING_INPUT = FIG_DIR / "rate_gap_queuing_data.json"
+GRIDWORLD_INPUT = FIG_DIR / "rate_gap_gridworld_data.json"
+JCR_INPUT = FIG_DIR / "rate_gap_jcr_data.json"
 
 # Match the appendix style.
 _C_DATA = "#0072B2"  # blue (median data)

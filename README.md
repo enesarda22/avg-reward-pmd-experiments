@@ -11,17 +11,17 @@ uv run python scripts/run_exact_pmd.py     # F.1, F.2 (3-state exact PMD)
 uv run python scripts/run_inexact_pmd.py   # F.3 (3-state inexact PMD sweep)
 
 # Rate-gap experiment (Figure 1 in the body, Figure F.4 in the appendix):
-uv run python scripts/run_rate_gap_capped.py            # random Dirichlet MDPs
-uv run python scripts/run_rate_gap_queuing_capped.py    # access-control queuing
-uv run python scripts/run_rate_gap_gridworld_capped.py  # 5x5 GridWorld
-uv run python scripts/run_rate_gap_jcr_capped.py        # Jack's car rental
+uv run python scripts/run_rate_gap.py            # random Dirichlet MDPs
+uv run python scripts/run_rate_gap_queuing.py    # access-control queuing
+uv run python scripts/run_rate_gap_gridworld.py  # 5x5 GridWorld
+uv run python scripts/run_rate_gap_jcr.py        # Jack's car rental
 
-uv run python scripts/plot_rate_gap_combined_capped.py  # body Figure 1
+uv run python scripts/plot_rate_gap_combined.py  # body Figure 1
 uv run python scripts/plot_rate_gap_appendix_panels.py  # appendix Figure F.4
 ```
 
 All outputs are written to `figures/` (auto-created; gitignored). The
-`run_rate_gap_*_capped.py` scripts each emit a `rate_gap_*_data_capped.json`
+`run_rate_gap*.py` scripts each emit a `rate_gap_*data.json`
 file with the per-run `chi` and `delta` trajectories; the two
 `plot_rate_gap_*` scripts read those JSONs and produce the body / appendix
 figures.
@@ -30,10 +30,10 @@ figures.
 
 | Paper figure | Producing script(s) |
 |---|---|
-| Body Fig. 1     | `run_rate_gap_*_capped.py` (4 scripts) → `plot_rate_gap_combined_capped.py` |
+| Body Fig. 1     | `run_rate_gap*.py` (4 scripts) → `plot_rate_gap_combined.py` |
 | App. Fig. F.1, F.2 | `run_exact_pmd.py` |
 | App. Fig. F.3   | `run_inexact_pmd.py` |
-| App. Fig. F.4   | `run_rate_gap_*_capped.py` (4 scripts) → `plot_rate_gap_appendix_panels.py` |
+| App. Fig. F.4   | `run_rate_gap*.py` (4 scripts) → `plot_rate_gap_appendix_panels.py` |
 
 ## Package layout
 
@@ -51,11 +51,11 @@ avg_reward_pmd/
 scripts/
   run_exact_pmd.py                  # F.1, F.2
   run_inexact_pmd.py                # F.3
-  run_rate_gap_capped.py            # random Dirichlet rate-gap data
-  run_rate_gap_queuing_capped.py    # queuing rate-gap data
-  run_rate_gap_gridworld_capped.py  # gridworld rate-gap data
-  run_rate_gap_jcr_capped.py        # JCR rate-gap data
-  plot_rate_gap_combined_capped.py  # body Figure 1
+  run_rate_gap.py                   # random Dirichlet rate-gap data
+  run_rate_gap_queuing.py           # queuing rate-gap data
+  run_rate_gap_gridworld.py         # gridworld rate-gap data
+  run_rate_gap_jcr.py               # JCR rate-gap data
+  plot_rate_gap_combined.py         # body Figure 1
   plot_rate_gap_appendix_panels.py  # appendix Figure F.4
 ```
 
